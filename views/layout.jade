@@ -1,0 +1,149 @@
+doctype html
+html
+	head
+		title Socket.IO chat
+		//- link(rel='stylesheet', href='/stylesheets/style.css')
+
+		style.
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing:
+				border-box;
+			}
+			body {
+				font: 13px Helvetica, Arial;
+			}
+			.chatblock{
+				width: 49%;
+				margin: 0.5%;
+				border: 1px solid #ccc;
+				display: inline-block;
+				vertical-align: top;
+				position: relative;
+			}
+			form {
+				background: #000;
+				position: fixed;
+				bottom: 0;
+				width: 49.5%;
+				margin-left: -0.5%;
+			}
+			form input {
+				border: 0;
+				padding: 10px;
+				width: calc(80% - 160px);
+				margin-right: .5%;
+			}
+			form button {
+				width: 150px;
+				background: rgb(130, 224, 255);
+				border:	none;
+				padding: 10px;
+			}
+			.messages {
+				list-style-type: none;
+				margin-bottom: 100px;
+				padding:0;
+				display: inline-block;
+				vertical-align: top;
+				width: calc(100% - 200px);
+			}
+			.messages li {
+				padding: 5px 10px;
+			}
+			.messages li:nth-child(odd) {
+				background: #eee;
+			}
+			#users{
+				width: 200px;
+				display: inline-block;
+				vertical-align: top;
+				float: right;
+				border: 1px solid black;
+				min-height: 20px;
+				padding: 5px;
+			}
+			#users p{
+				text-align: center;
+			}
+			#userlist{
+				hei
+			}
+			#privatechat p{
+				text-align: center;
+			}
+			#nick {
+				margin: 10px;
+				width: 10%
+			}
+			#nicklabel{
+				color: white;
+			}
+			.mlabel{
+				color: white;
+			}
+			.m {
+				padding:8px;
+				width: calc(100% - 210px);
+			}
+
+	body
+		block content
+
+		script(src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js")
+		script(src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js")
+		script
+			:coffee-script
+				while person == null || typeof person == 'undefined'
+					person = prompt('Please enter your name', '')
+				$(document).ready ->
+					socket = io()
+
+					if person != null
+						socket.emit('new user', {nick : person});
+
+					cont = 0
+					fnick = $('#nick')
+					fmessage = $('#m')
+					$userlist = $('#userlist')
+					friend = undefined
+					frmessage = $('#m_private')
+
+					$('form#form').submit ->
+						socket.emit('chat message', {nick : person, message : fmessage.val()});
+						fmessage.val('');
+						return false;
+
+					socket.on 'chat message', (msg)->
+						$('#messages').append($('<li>').append('<b>'+msg.nick+'</b>: ' + msg.message));
+
+					socket.on 'chat users', (msg)->
+						$('#num').text("Usuarios conectados: "+ msg);
+
+					socket.on 'user added', (users)->
+						console.log users
+						list = ''
+						for user in users
+							list += '<li>' + user + '</li>'
+						console.log list
+						$userlist.html(list)
+
+					$userlist.on 'click', 'li', ->
+						friend = $(@).text()
+						if friend is person then return alert 'Necesitas un espejo'
+						$('#privatechat').children('p').text('Chat privado entre ' + person + ' y ' + friend )
+
+
+					$('form#_private').submit ->
+						console.log friend
+						if friend is undefined then return alert 'No tienes amigos? :('
+						socket.emit('chat friend', {emiter : person, message : frmessage.val(), receiver: friend});
+						frmessage.val('');
+						return false;
+
+					socket.on 'chat friend', (data)->
+						console.log data
+						if not friend then friend = data.emiter
+						$('#privatechat').children('p').text('Chat privado entre ' + friend  + ' y ' +  person)
+						$('#messages_private').append($('<li>').append('<b>'+data.emiter+'</b>: ' + data.msg));

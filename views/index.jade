@@ -1,0 +1,27 @@
+extends layout
+
+block content
+	h1 Chat Socket.io
+	p#num usuarios conectados:0
+	#generalchat.chatblock
+		ul#messages.messages
+		#users
+			p Usuarios conectados (clica para chat privado)
+			ul#userlist
+		form#form(action="")
+			//- label#nicklabel(for="nick") Nick:
+			//- input#nick(type="text",autocomplete="off")
+			label#mlabel.mlabel(for="m") Mensaje:
+			input#m.m(type="text", autocomplete="off")
+			button Send
+
+
+	#privatechat.chatblock
+		p Chat privado
+		ul#messages_private.messages
+		form#_private(action="")
+			//- label#nicklabel(for="nick") Nick:
+			//- input#nickto(type="hidden")
+			label#mlabel_private.mlabel(for="m") Mensaje:
+			input#m_private.m(type="text", autocomplete="off")
+			button Send
